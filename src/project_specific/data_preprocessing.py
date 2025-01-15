@@ -25,14 +25,17 @@ def type_conversion(df: pd.DataFrame, columns_to_convert: list):
     return df
 
 
-def get_data_types(df: pd.DataFrame, target_variable='Survived'):
+def get_data_types(df: pd.DataFrame, df_name: str = None, target_variable='Survived'):
     """
     Identify numerical and categorical features.
-    Returns 2 lists: numerical_features and categorical_features, without the target in the categorical features list.
+    Returns 2 lists: numerical_features and categorical_features,
+    without the target in the categorical features list.
 
     Parameters:
     - df: pandas DataFrame
         The DataFrame to process.
+    - df_name: str, optional
+        The “name” of the DataFrame (e.g., 'train', 'test'). Defaults to None.
     - target_variable: str, default 'Survived'
         The name of the target variable (if present).
 
@@ -42,25 +45,23 @@ def get_data_types(df: pd.DataFrame, target_variable='Survived'):
     - categorical_features: list
         List of categorical feature names.
     """
-
     if target_variable in df.columns:
         target_in_df = True
     else:
         target_in_df = False
-    
+
     numerical_features = df.select_dtypes(include=[np.number]).columns.tolist()
     categorical_features = df.select_dtypes(include=['object', 'category']).columns.tolist()
 
-    # Remove the target variable from categorical features if present
+    # Remove the target variable from numerical features if present
     if target_in_df and target_variable in numerical_features:
         numerical_features.remove(target_variable)
 
-    print("\nNumerical Features:", numerical_features)
-    print("Categorical Features:", categorical_features)
+    # Print info about the target variable
     if target_in_df:
-        print("Target Variable:", target_variable)
+        print(f"Target Variable: {target_variable}")
     else:
-        print(f"Target Variable '{target_variable}' not found in DataFrame.")
+        print(f"Target Variable '{target_variable}' not found in DataFrame {df_name}.")
 
     return numerical_features, categorical_features
 
@@ -107,7 +108,6 @@ def fare_missing_values_imputation(df_test: pd.DataFrame, df_train: pd.DataFrame
         df_test.loc[idx, 'Fare'] = imputed_fare
 
     # Verify that all missing 'Fare' values have been imputed
-    print("\nAfter imputation:")
     print("Remaining missing 'Fare' values in test dataset:", df_test['Fare'].isnull().sum())
 
     return df_test
@@ -129,7 +129,6 @@ def embarked_missing_value_imputation(df_train: pd.DataFrame):
     df_train.loc[:, 'Embarked'] = df_train['Embarked'].fillna('C')
 
     # Verify that all missing 'Embarked' values have been imputed
-    print("\nAfter imputation:")
     print("Remaining missing 'Embarked' values in train dataset:", df_train['Embarked'].isnull().sum())
 
     return df_train 
@@ -147,8 +146,7 @@ def delete_features(var_list, var_to_delete):
     - list: var_list without the features in var_to_delete.
     """
     filtered_var_list  = [feature for feature in var_list if feature not in var_to_delete]
-
-    print("Features:", filtered_var_list )
+    # print("Features:", filtered_var_list)
 
     return filtered_var_list 
 
@@ -168,7 +166,7 @@ def add_features(var_list, features_to_add):
         if feature not in var_list:
             var_list.append(feature)
 
-    print("Features:", var_list)
+    # print("Features:", var_list)
 
     return var_list
 
@@ -249,5 +247,137 @@ def replace_missing_age_with_median(combined_df):
     train_data = combined_df[combined_df['dataset_type'] == 'train'].drop(columns=['dataset_type'])
     test_data = combined_df[combined_df['dataset_type'] == 'test'].drop(columns=['dataset_type', 'Survived'])
 
+    # Verify that all missing 'Age' values have been imputed
+    print("Remaining missing 'Age' values in the combined dataset:", combined_df['Age'].isnull().sum())
     return train_data, test_data
 
+
+def run_dm_pipeline(test, train):
+    """
+    Run a data management pipeline with feature engineering steps for the Titanic dataset.
+
+    This function applies a series of transformations to both the train and test datasets,
+    including data type conversions, missing value imputation, feature extraction, and
+    dropping unnecessary columns. The goal is to prepare the data for downstream modeling.
+
+    Args:
+        test (pd.DataFrame): The test dataset, expected to contain columns such as 'Pclass', 'SibSp', 
+            'Parch', 'Fare', 'Cabin', and other Titanic-related features.
+        train (pd.DataFrame): The training dataset, expected to contain the same columns as `test` plus 
+            the target variable 'Survived'.
+
+    Returns:
+        dict:
+            A dictionary with the following keys:
+            - "test" (pd.DataFrame): The processed test dataset.
+            - "train" (pd.DataFrame): The processed train dataset.
+            - "categorical_features" (list of str): The final list of categorical feature names.
+            - "numerical_features" (list of str): The final list of numerical feature names.
+            - "target" (str): The target column name ('Survived').
+
+    Processing Steps Overview:
+        1. Type conversion of specified columns (e.g., 'Pclass') in both datasets.
+        2. Identification of numerical and categorical features.
+        3. Imputation of missing 'Fare' values in the test set using information from the train set.
+        4. Handling of missing 'Embarked' values in the train set.
+        5. Extraction of 'Title' and 'LastName' from passenger names.
+        6. Creation of simplified or grouped titles via 'manage_titles'.
+        7. Feature engineering for 'Deck' based on cabin information.
+        8. Removal of unused columns (e.g., 'Name', 'LastName', 'Title', 'Cabin', 'Ticket').
+        9. Extraction of family-related features (e.g., 'Is_Alone', 'Family_Size').
+        10. Final data type conversions and cleanup.
+        11. Replacement of missing 'Age' values with median ages per group.
+    
+    Note:
+        - This pipeline modifies the input DataFrames in place and returns the final versions.
+        - It is tailored specifically to the Titanic dataset but can serve as a template for 
+          other datasets with similar preprocessing needs.
+    """
+    train = type_conversion(df=train, columns_to_convert=['Pclass'])
+    test = type_conversion(df=test, columns_to_convert=['Pclass'])
+
+    numerical_features_train, categorical_features_train = get_data_types(train, df_name='train', target_variable='Survived')
+    numerical_features_test, categorical_features_test = get_data_types(test, df_name='test', target_variable='Survived')
+
+    test = fare_missing_values_imputation(df_test=test, df_train=train)
+
+    combined = create_combined_dataset(train_df=train, test_df=test)
+    train = embarked_missing_value_imputation(train)
+
+    train = extract_title_lastname(train)
+    test = extract_title_lastname(test)
+
+    train = manage_titles(train)
+    test = manage_titles(test)
+
+    categorical_features_train = add_features(
+        var_list=categorical_features_train,
+        features_to_add=['Simplified_Title']
+    )
+    categorical_features_test = add_features(
+        var_list=categorical_features_test,
+        features_to_add=['Simplified_Title']
+    )
+
+    test = extract_deck(test)
+    train = extract_deck(train)
+
+    categorical_features_train = add_features(
+        var_list=categorical_features_train,
+        features_to_add=['Deck']
+    )
+    categorical_features_test = add_features(
+        var_list=categorical_features_test,
+        features_to_add=['Deck']
+    )
+
+    to_delete = ['Name', 'LastName', 'Title', 'Cabin', 'Ticket']
+    categorical_features_train = delete_features(var_list=categorical_features_train, var_to_delete=to_delete)
+    categorical_features_test = delete_features(var_list=categorical_features_test, var_to_delete=to_delete)
+
+    test = extract_family_alone(test)
+    train = extract_family_alone(train)
+
+    train = type_conversion(df=train, columns_to_convert=['Is_Alone'])
+    test = type_conversion(df=test, columns_to_convert=['Is_Alone'])
+
+    numerical_features_train = add_features(
+        var_list=numerical_features_train,
+        features_to_add=['Family_Size']
+    )
+    numerical_features_test = add_features(
+        var_list=numerical_features_test,
+        features_to_add=['Family_Size']
+    )
+
+    categorical_features_train = add_features(
+        var_list=categorical_features_train,
+        features_to_add=['Is_Alone']
+    )
+    categorical_features_test = add_features(
+        var_list=categorical_features_test,
+        features_to_add=['Is_Alone']
+    )
+
+    to_delete = ['SibSp', 'Parch']
+    numerical_features_train = delete_features(var_list=numerical_features_train, var_to_delete=to_delete)
+    numerical_features_test = delete_features(var_list=numerical_features_test, var_to_delete=to_delete)
+
+    combined = create_combined_dataset(train_df=train, test_df=test)
+    train, test = replace_missing_age_with_median(combined_df=combined)
+
+    categorical_features = categorical_features_train
+    numerical_features = numerical_features_train
+    target = 'Survived'
+
+    print('\nCategorical_features:', categorical_features)
+    print('Numerical features:', numerical_features)
+    print('target:', target)
+
+    return {
+        'test': test,
+        'train': train,
+        'categorical_features': categorical_features,
+        'numerical_features': numerical_features,
+        'target': target,
+    }
