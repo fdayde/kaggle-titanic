@@ -30,16 +30,16 @@ class PathManager:
             FileNotFoundError: If the dataset or working paths do not exist.
         """
         # Determine environment and set paths
-        if os.path.exists('/kaggle'):
+        if os.path.exists("/kaggle"):
             print("Running on Kaggle.")
-            self.dataset_path = '/kaggle/input/{self.dataset_name}'
-            self.working_path = '/kaggle/working'
+            self.dataset_path = "/kaggle/input/{self.dataset_name}"
+            self.working_path = "/kaggle/working"
         else:
             print("Running on local.")
             # Assuming the notebook is in the 'notebooks' folder
-            project_root = os.path.abspath('../')
-            data_dir = os.path.join(project_root, 'data')
-            working_dir = os.path.join(data_dir, 'working')
+            project_root = os.path.abspath("../")
+            data_dir = os.path.join(project_root, "data")
+            working_dir = os.path.join(data_dir, "working")
 
             print(f"Dataset directory: {data_dir}")
             print(f"Working directory: {working_dir}")
@@ -58,10 +58,14 @@ class PathManager:
             FileNotFoundError: If the dataset or working paths do not exist.
         """
         if not os.path.exists(self.dataset_path):
-            raise FileNotFoundError(f"The dataset path does not exist: {self.dataset_path}")
+            raise FileNotFoundError(
+                f"The dataset path does not exist: {self.dataset_path}"
+            )
 
         if not os.path.exists(self.working_path):
-            raise FileNotFoundError(f"The working path does not exist: {self.working_path}")
+            raise FileNotFoundError(
+                f"The working path does not exist: {self.working_path}"
+            )
 
     def __str__(self) -> str:
         """
@@ -71,6 +75,5 @@ class PathManager:
             str: Formatted dataset and working paths.
         """
         return (
-            f"Dataset Path: {self.dataset_path}\n"
-            f"Working Path: {self.working_path}"
+            f"Dataset Path: {self.dataset_path}\n" f"Working Path: {self.working_path}"
         )

@@ -8,7 +8,6 @@ from typing import Dict
 import logging
 
 
-
 class DataOverview:
     """
     A class to perform data overview and exploration on pandas DataFrames.
@@ -33,7 +32,7 @@ class DataOverview:
         print("- First five rows:")
         display(df.head())
         print("\n- Summary Statistics:")
-        display(df.describe(include='all'))
+        display(df.describe(include="all"))
 
     def missing_values_analysis(self, df: pd.DataFrame, df_name: str) -> None:
         """
@@ -48,7 +47,7 @@ class DataOverview:
         missing = missing[missing > 0]
         print("- Missing values in each column:")
         print(missing)
-        
+
         # Visualize missing values
         if missing.any():
             print("\n- Visualizing missing values:")
@@ -85,7 +84,9 @@ class DataOverview:
 
         print("\n => Numerical and categorical features based on types")
         numerical_features = df.select_dtypes(include=[np.number]).columns.tolist()
-        categorical_features = df.select_dtypes(include=['object', 'category']).columns.tolist()
+        categorical_features = df.select_dtypes(
+            include=["object", "category"]
+        ).columns.tolist()
         print("\nNumerical Features:", numerical_features)
         print("Categorical Features:", categorical_features)
 

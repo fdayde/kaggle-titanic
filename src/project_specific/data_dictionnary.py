@@ -4,14 +4,26 @@ import pandas as pd
 def create_data_dictionnary_df():
     """
     Creates a DataFrame describing the Titanic dataset features, their definitions, keys, and additional notes.
-    
+
     Returns:
     - pandas DataFrame with columns 'Variable', 'Definition', 'Key', and 'Note'
     """
 
     data = {
-        "Variable": ["PassengerId", "Survived", "Pclass", "Name", "Sex", "Age",
-                     "SibSp", "Parch", "Ticket", "Fare", "Cabin", "Embarked"],
+        "Variable": [
+            "PassengerId",
+            "Survived",
+            "Pclass",
+            "Name",
+            "Sex",
+            "Age",
+            "SibSp",
+            "Parch",
+            "Ticket",
+            "Fare",
+            "Cabin",
+            "Embarked",
+        ],
         "Definition": [
             "Passenger's unique identifier",
             "Survival status",
@@ -24,7 +36,7 @@ def create_data_dictionnary_df():
             "Ticket number",
             "Passenger fare",
             "Cabin number",
-            "Port of Embarkation"
+            "Port of Embarkation",
         ],
         "Key": [
             "Unique ID",
@@ -38,7 +50,7 @@ def create_data_dictionnary_df():
             "",
             "",
             "",
-            "C = Cherbourg, Q = Queenstown, S = Southampton"
+            "C = Cherbourg, Q = Queenstown, S = Southampton",
         ],
         "Note": [
             "",
@@ -52,10 +64,10 @@ def create_data_dictionnary_df():
             "",
             "",
             "May have multiple cabin numbers",
-            ""
-        ]
+            "",
+        ],
     }
-    
+
     df = pd.DataFrame(data)
-    
+
     return df
