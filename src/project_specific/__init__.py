@@ -25,7 +25,7 @@ from .data_analysis import (
     analyze_correlation,
     cramers_v,
     chi_square_test_train,
-    preprocessing_log_reg
+    preprocessing_log_reg,
 )
 
 __all__ = [
@@ -51,7 +51,7 @@ __all__ = [
     "chi2_categorical_features",
     "chi2_all_categorical",
     "analyze_correlation",
-    "cramers_v", 
+    "cramers_v",
     "chi_square_test_train",
-    "preprocessing_log_reg"
+    "preprocessing_log_reg",
 ]

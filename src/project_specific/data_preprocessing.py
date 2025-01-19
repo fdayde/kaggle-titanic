@@ -282,7 +282,7 @@ def create_log_fare(df: pd.DataFrame) -> pd.DataFrame:
     Adds a new column 'LogFare' to the given DataFrame, containing the natural log of (Fare + 1).
 
     Args:
-        df (pd.DataFrame): 
+        df (pd.DataFrame):
             A pandas DataFrame that must include a 'Fare' column.
 
     Returns:
@@ -294,11 +294,11 @@ def create_log_fare(df: pd.DataFrame) -> pd.DataFrame:
         - This function modifies the input DataFrame in-place.
         - If 'Fare' contains negative or missing values, the result in 'LogFare' could be NaN or raise errors.
     """
-    df['LogFare'] = np.log1p(df['Fare']) 
+    df["LogFare"] = np.log1p(df["Fare"])
     return df
 
 
-def add_age_group(df: pd.DataFrame, age_column: str = 'Age') -> pd.DataFrame:
+def add_age_group(df: pd.DataFrame, age_column: str = "Age") -> pd.DataFrame:
     """
     Adds an 'AgeGroup' column to the given DataFrame, categorizing ages into predefined groups.
 
@@ -319,11 +319,11 @@ def add_age_group(df: pd.DataFrame, age_column: str = 'Age') -> pd.DataFrame:
         - Non-numeric or missing values in the age column will result in NaN in the 'AgeGroup' column.
     """
     # Define age group bins and labels
-    bins = [0, 12, 20, 40, 60, float('inf')]
-    labels = ['Child', 'Teenager', 'Adult_20_39', 'Adult_40_59', '60+']
+    bins = [0, 12, 20, 40, 60, float("inf")]
+    labels = ["Child", "Teenager", "Adult_20_39", "Adult_40_59", "60+"]
 
     # Use pd.cut to create the AgeGroup column
-    df['AgeGroup'] = pd.cut(df[age_column], bins=bins, labels=labels, right=False)
+    df["AgeGroup"] = pd.cut(df[age_column], bins=bins, labels=labels, right=False)
 
     return df
 
@@ -466,7 +466,7 @@ def run_dm_pipeline(test, train):
     train = add_age_group(train)
     test = add_age_group(test)
     categorical_features_train = add_features(
-    var_list=categorical_features_train, features_to_add=["AgeGroup"]
+        var_list=categorical_features_train, features_to_add=["AgeGroup"]
     )
     categorical_features_test = add_features(
         var_list=categorical_features_test, features_to_add=["AgeGroup"]
@@ -478,7 +478,7 @@ def run_dm_pipeline(test, train):
         var_list=numerical_features_test, var_to_delete=["Age"]
     )
 
-    numerical_features_train.remove('PassengerId')
+    numerical_features_train.remove("PassengerId")
 
     categorical_features = categorical_features_train
     numerical_features = numerical_features_train
