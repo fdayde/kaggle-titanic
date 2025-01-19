@@ -478,6 +478,8 @@ def run_dm_pipeline(test, train):
         var_list=numerical_features_test, var_to_delete=["Age"]
     )
 
+    numerical_features_train.remove('PassengerId')
+
     categorical_features = categorical_features_train
     numerical_features = numerical_features_train
     target = "Survived"
