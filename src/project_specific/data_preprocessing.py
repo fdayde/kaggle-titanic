@@ -277,6 +277,57 @@ def replace_missing_age_with_median(combined_df):
     return train_data, test_data
 
 
+def create_log_fare(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Adds a new column 'LogFare' to the given DataFrame, containing the natural log of (Fare + 1).
+
+    Args:
+        df (pd.DataFrame): 
+            A pandas DataFrame that must include a 'Fare' column.
+
+    Returns:
+        pd.DataFrame:
+            The same DataFrame with the added 'LogFare' column.
+
+    Notes:
+        - Using log(Fare + 1) helps stabilize variance when 'Fare' is heavily skewed.
+        - This function modifies the input DataFrame in-place.
+        - If 'Fare' contains negative or missing values, the result in 'LogFare' could be NaN or raise errors.
+    """
+    df['LogFare'] = np.log1p(df['Fare']) 
+    return df
+
+
+def add_age_group(df: pd.DataFrame, age_column: str = 'Age') -> pd.DataFrame:
+    """
+    Adds an 'AgeGroup' column to the given DataFrame, categorizing ages into predefined groups.
+
+    Args:
+        df (pd.DataFrame): The input DataFrame containing the age data.
+        age_column (str): The name of the column containing age values. Default is 'Age'.
+
+    Returns:
+        pd.DataFrame: The modified DataFrame with a new 'AgeGroup' column.
+
+    Notes:
+        - Age groups are defined as follows:
+            - 'Child': 0–11
+            - 'Teenager': 12–19
+            - 'Adult_20_39': 20–39
+            - 'Adult_40_59': 40–59
+            - '60+': 60 and above
+        - Non-numeric or missing values in the age column will result in NaN in the 'AgeGroup' column.
+    """
+    # Define age group bins and labels
+    bins = [0, 12, 20, 40, 60, float('inf')]
+    labels = ['Child', 'Teenager', 'Adult_20_39', 'Adult_40_59', '60+']
+
+    # Use pd.cut to create the AgeGroup column
+    df['AgeGroup'] = pd.cut(df[age_column], bins=bins, labels=labels, right=False)
+
+    return df
+
+
 def run_dm_pipeline(test, train):
     """
     Run a data management pipeline with feature engineering steps for the Titanic dataset.
@@ -312,6 +363,8 @@ def run_dm_pipeline(test, train):
         9. Extraction of family-related features (e.g., 'Is_Alone', 'Family_Size').
         10. Final data type conversions and cleanup.
         11. Replacement of missing 'Age' values with median ages per group.
+        12. Add column 'LogFare' to the datasets.
+        13. Add column 'AgeGroup' to the datasets.
 
     Note:
         - This pipeline modifies the input DataFrames in place and returns the final versions.
@@ -394,6 +447,36 @@ def run_dm_pipeline(test, train):
 
     combined = create_combined_dataset(train_df=train, test_df=test)
     train, test = replace_missing_age_with_median(combined_df=combined)
+
+    train = create_log_fare(train)
+    test = create_log_fare(test)
+    numerical_features_train = add_features(
+        var_list=numerical_features_train, features_to_add=["LogFare"]
+    )
+    numerical_features_test = add_features(
+        var_list=numerical_features_test, features_to_add=["LogFare"]
+    )
+    numerical_features_train = delete_features(
+        var_list=numerical_features_train, var_to_delete=["Fare"]
+    )
+    numerical_features_test = delete_features(
+        var_list=numerical_features_test, var_to_delete=["Fare"]
+    )
+
+    train = add_age_group(train)
+    test = add_age_group(test)
+    categorical_features_train = add_features(
+    var_list=categorical_features_train, features_to_add=["AgeGroup"]
+    )
+    categorical_features_test = add_features(
+        var_list=categorical_features_test, features_to_add=["AgeGroup"]
+    )
+    numerical_features_train = delete_features(
+        var_list=numerical_features_train, var_to_delete=["Age"]
+    )
+    numerical_features_test = delete_features(
+        var_list=numerical_features_test, var_to_delete=["Age"]
+    )
 
     categorical_features = categorical_features_train
     numerical_features = numerical_features_train

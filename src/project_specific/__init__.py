@@ -13,6 +13,8 @@ from .data_preprocessing import (
     extract_family_alone,
     create_combined_dataset,
     replace_missing_age_with_median,
+    create_log_fare,
+    add_age_group,
     run_dm_pipeline,
 )
 
@@ -31,5 +33,7 @@ __all__ = [
     "extract_family_alone",
     "create_combined_dataset",
     "replace_missing_age_with_median",
+    "create_log_fare",
+    "add_age_group",
     "run_dm_pipeline",
 ]
