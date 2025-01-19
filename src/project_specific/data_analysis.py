@@ -5,6 +5,8 @@ import pandas as pd
 import seaborn as sns
 from scipy.stats import chi2_contingency
 from itertools import combinations
+from sklearn.preprocessing import StandardScaler
+import statsmodels.api as sm
 
 
 def plot_categorical_features_vs_target(data, categorical_features, target, max_cols=2, figsize=(14, 12)):
@@ -234,3 +236,43 @@ def one_hot_encode_drop_most_populated(df, categorical_features, most_represente
         df = pd.get_dummies(df, columns=[feature], drop_first=False).drop(f"{feature}_{most_frequent}", axis=1)
     return df
 
+
+def preprocessing_log_reg(data, categorical_features, numerical_features, target):
+    """
+    Preprocesses the data for logistic regression.
+
+    Args:
+        data (pd.DataFrame): The input dataset.
+        categorical_features (list): List of categorical feature names.
+        numerical_features (list): List of numerical feature names.
+        target (str): The target column name.
+
+    Returns:
+        tuple: Preprocessed feature matrix (X_train) and target vector (y_train).
+    """
+    # Filter relevant columns
+    data = data[categorical_features + numerical_features + [target]]
+    
+    # Extract the most represented levels
+    most_represented_levels = extract_most_represented_levels(data, categorical_features)
+    print("Most represented levels:", most_represented_levels)
+    
+    # One-hot encode categorical features and drop most populated levels
+    encoded_data = one_hot_encode_drop_most_populated(data, categorical_features, most_represented_levels)
+
+    # Scale numerical features
+    scaler = StandardScaler()
+    encoded_data[numerical_features] = scaler.fit_transform(encoded_data[numerical_features])
+
+    # Features-Target split
+    X_train = encoded_data.drop(target, axis=1)
+    y_train = encoded_data[target]
+    
+    # Convert boolean columns to integers
+    X_train = X_train.astype(int)
+    y_train = y_train.astype(int)
+
+    # Add a constant for the intercept
+    X_train = sm.add_constant(X_train)
+
+    return X_train, y_train

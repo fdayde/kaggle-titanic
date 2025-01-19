@@ -25,8 +25,7 @@ from .data_analysis import (
     analyze_correlation,
     cramers_v,
     chi_square_test_train,
-    extract_most_represented_levels,
-    one_hot_encode_drop_most_populated
+    preprocessing_log_reg
 )
 
 __all__ = [
@@ -54,6 +53,5 @@ __all__ = [
     "analyze_correlation",
     "cramers_v", 
     "chi_square_test_train",
-    "extract_most_represented_levels",
-    "one_hot_encode_drop_most_populated"
+    "preprocessing_log_reg"
 ]
