@@ -17,6 +17,17 @@ from .data_preprocessing import (
     add_age_group,
     run_dm_pipeline,
 )
+from .data_analysis import (
+    plot_categorical_features_vs_target,
+    plot_numerical_features_vs_target,
+    chi2_categorical_features,
+    chi2_all_categorical,
+    analyze_correlation,
+    cramers_v,
+    chi_square_test_train,
+    extract_most_represented_levels,
+    one_hot_encode_drop_most_populated
+)
 
 __all__ = [
     "create_data_dictionnary_df",
@@ -36,4 +47,13 @@ __all__ = [
     "create_log_fare",
     "add_age_group",
     "run_dm_pipeline",
+    "plot_categorical_features_vs_target",
+    "plot_numerical_features_vs_target",
+    "chi2_categorical_features",
+    "chi2_all_categorical",
+    "analyze_correlation",
+    "cramers_v", 
+    "chi_square_test_train",
+    "extract_most_represented_levels",
+    "one_hot_encode_drop_most_populated"
 ]
