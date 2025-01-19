@@ -26,6 +26,7 @@ from .data_analysis import (
     cramers_v,
     chi_square_test_train,
     preprocessing_log_reg,
+    test_logistic_regression_assumptions_preprocessed,
 )
 
 __all__ = [
@@ -54,4 +55,5 @@ __all__ = [
     "cramers_v",
     "chi_square_test_train",
     "preprocessing_log_reg",
+    "test_logistic_regression_assumptions_preprocessed",
 ]
