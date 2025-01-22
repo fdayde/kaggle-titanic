@@ -484,6 +484,8 @@ def run_dm_pipeline(test, train):
     numerical_features = numerical_features_train
     target = "Survived"
 
+    test_ids = test["PassengerId"].copy()
+
     print("\nCategorical_features:", categorical_features)
     print("Numerical features:", numerical_features)
     print("target:", target)
@@ -494,4 +496,5 @@ def run_dm_pipeline(test, train):
         "categorical_features": categorical_features,
         "numerical_features": numerical_features,
         "target": target,
+        "test_ids": test_ids
     }

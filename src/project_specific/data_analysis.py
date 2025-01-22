@@ -7,6 +7,7 @@ from scipy.stats import chi2_contingency
 from itertools import combinations
 from sklearn.preprocessing import StandardScaler
 import statsmodels.api as sm
+from statsmodels.stats.outliers_influence import variance_inflation_factor
 
 
 def plot_categorical_features_vs_target(
@@ -293,3 +294,53 @@ def preprocessing_log_reg(data, categorical_features, numerical_features, target
     X_train = sm.add_constant(X_train)
 
     return X_train, y_train
+
+
+def test_logistic_regression_assumptions_preprocessed(X_train, y_train, continuous_features=[]):
+    """
+    Test key assumptions of logistic regression on preprocessed data.
+
+    Args:
+        X_train (pd.DataFrame): Preprocessed feature matrix (with constant included).
+        y_train (pd.Series): Preprocessed target vector.
+        continuous_features (list): List of continuous features for linearity checks.
+
+    Returns:
+        dict: A dictionary of diagnostic outputs for each assumption.
+    """
+    results = {}
+
+    # 1. Multicollinearity Check (Variance Inflation Factor)
+    vif_data = pd.DataFrame()
+    vif_data["feature"] = X_train.columns
+    vif_data["VIF"] = [variance_inflation_factor(X_train.values, i) for i in range(X_train.shape[1])]
+    results["VIF"] = vif_data
+
+    # 2. Linearity of Continuous Predictors on the Logit
+    if continuous_features:
+        # Extract continuous features and scale them
+        X_continuous = X_train[continuous_features]
+        scaled_continuous = StandardScaler().fit_transform(X_continuous)
+        logit_model = sm.Logit(y_train, sm.add_constant(scaled_continuous)).fit(disp=False)
+        logit = logit_model.predict(sm.add_constant(scaled_continuous))
+
+        # Generate plots
+        fig, axes = plt.subplots(len(continuous_features), 1, figsize=(8, len(continuous_features) * 4))
+        if len(continuous_features) == 1:
+            axes = [axes]
+        for i, feature in enumerate(continuous_features):
+            axes[i].scatter(X_continuous[feature], np.log(logit / (1 - logit)), alpha=0.5)
+            axes[i].set_title(f"Linearity Check: {feature}")
+            axes[i].set_xlabel(feature)
+            axes[i].set_ylabel("Logit")
+        plt.tight_layout()
+        plt.show()
+        results["linearity"] = "Linearity plots generated. Inspect scatterplots for linear trends."
+
+    # 3. Influential Observations
+    model = sm.Logit(y_train, X_train).fit(disp=False)
+    influence = model.get_influence()
+    summary_frame = influence.summary_frame()
+    results["influential_points"] = summary_frame[["cooks_d", "standard_resid", "hat_diag"]].sort_values(by="cooks_d", ascending=False).head()
+
+    return results
